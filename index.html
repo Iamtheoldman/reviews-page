@@ -7,8 +7,6 @@
   <style>
     :root{
       --bg:#0b1220;
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.08);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.70);
       --faint:rgba(255,255,255,.45);
@@ -39,7 +37,6 @@
 
     .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 64px}
 
-    /* Top */
     .top{
       display:grid;
       grid-template-columns: 1.3fr .7fr;
@@ -100,6 +97,7 @@
     }
     .statLabel{color:var(--muted);font-size:13px}
     .statValue{font-weight:800;font-size:18px;letter-spacing:.2px}
+
     .pill{
       display:inline-flex;
       align-items:center;
@@ -114,10 +112,9 @@
     }
     .dot{width:9px;height:9px;border-radius:99px;background:var(--accent)}
 
-    /* Controls */
     .controls{
       display:grid;
-      grid-template-columns: 1.4fr .6fr .6fr auto;
+      grid-template-columns: 1.4fr .6fr .6fr auto auto;
       gap:10px;
       margin:14px 0 16px;
       padding:12px;
@@ -160,6 +157,7 @@
       user-select:none;
       font-weight:650;
       letter-spacing:.2px;
+      white-space:nowrap;
     }
     .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.24)}
     .btn:active{transform:translateY(0)}
@@ -170,7 +168,6 @@
       color:var(--muted);
     }
 
-    /* Grid */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
@@ -230,6 +227,7 @@
       font-weight:700;
     }
     .link:focus{outline:none;box-shadow:var(--ring);border-radius:8px}
+
     .empty{
       border:1px dashed rgba(255,255,255,.22);
       border-radius:var(--radius2);
@@ -239,9 +237,7 @@
       text-align:center;
       display:none;
     }
-    .footerActions{display:flex;gap:10px;justify-content:center;margin-top:16px}
 
-    /* Modal */
     .modalBackdrop{
       position:fixed;inset:0;
       background:rgba(0,0,0,.6);
@@ -277,13 +273,6 @@
     .iconBtn:focus{outline:none;box-shadow:var(--ring)}
     .modalBody{padding:16px;display:grid;gap:12px}
     .modalQuote{margin:0;font-size:15px;color:rgba(255,255,255,.9);line-height:1.6;white-space:pre-wrap}
-
-    /* Print-friendly (optional) */
-    @media print{
-      body{background:#fff;color:#000}
-      .controls,.footerActions,.pill,.modalBackdrop{display:none!important}
-      .card{box-shadow:none;border:1px solid #ccc}
-    }
   </style>
 </head>
 <body>
@@ -291,9 +280,7 @@
     <div class="top">
       <section class="hero">
         <h1>What members are saying</h1>
-        <p>
-          Curated testimonials with fast search, smart filters, and a “read more” experience that keeps the page scannable.
-        </p>
+        <p>Hardcoded testimonials with search + filters. (Now using your full survey testimonial set.)</p>
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
           <span class="pill"><span class="dot"></span>Hardcoded data</span>
           <span class="pill"><span class="dot" style="background:var(--good)"></span>Promoters</span>
@@ -348,22 +335,17 @@
       </div>
 
       <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+      <button class="btn secondary" id="clearPrefsBtn" type="button">Clear saved settings</button>
     </section>
 
     <div id="status" class="label" style="margin: 0 0 10px 2px; color: var(--muted);"></div>
-
     <section id="grid" class="grid" aria-label="Reviews list"></section>
 
     <div id="empty" class="empty">
       No reviews match your filters. Try clearing search or lowering the minimum score.
     </div>
-
-    <div class="footerActions">
-      <button class="btn" id="moreBtn" type="button" style="display:none;">Load more</button>
-    </div>
   </div>
 
-  <!-- Modal -->
   <div id="modalBackdrop" class="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal" role="document">
       <div class="modalHeader">
@@ -382,37 +364,164 @@
 
   <script>
     /**
-     * ✅ HARD-CODED DATA
-     * Replace/extend this array with your real reviews.
-     * Tip: keep text plain (no HTML) and we will safely render it.
+     * ✅ HARD-CODED DATA (FROM YOUR SURVEY EXPORT)
+     * Fields used:
+     * - score = "How likely is it that you would recommend ..."
+     * - text  = "(Your Testimonial)"
+     * - date  = End Date (YYYY-MM-DD)
      */
     const REVIEWS = [
-      { score: 10, date: "2026-02-18", text: "Incredibly easy to use and the support team actually follows through. It’s made a noticeable difference for me." },
-      { score: 9,  date: "2026-02-03", text: "Simple, clean experience. I like how quickly I can get what I need without jumping through hoops." },
-      { score: 10, date: "2026-01-22", text: "My favorite part is how clear everything is. It feels designed for real people, not just checkboxes." },
-      { score: 8,  date: "2026-01-11", text: "Overall great. A couple steps could be a bit clearer, but the results have been worth it." },
-      { score: 9,  date: "2025-12-27", text: "Fast, friendly, and consistent. The experience has been smooth from day one." },
-      { score: 7,  date: "2025-12-12", text: "Good experience. I’d love to see more tips or a quick-start guide for new users." },
-      { score: 10, date: "2025-11-28", text: "Honestly, this is the first time I’ve felt truly supported. Everything is straightforward and helpful." },
-      { score: 6,  date: "2025-11-02", text: "Helpful, but I had some confusion at the start. Once I got it set up, it was fine." },
-      { score: 9,  date: "2025-10-19", text: "Great experience. It saves time and removes a lot of stress." },
-      { score: 10, date: "2025-10-01", text: "Super easy, and I feel like I’m finally on track. Wish I had started sooner." },
-      { score: 8,  date: "2025-09-15", text: "Solid. Would recommend. The UI is clean and I like the reminders." },
-      { score: 9,  date: "2025-09-03", text: "The process is smooth and the communication is clear. That matters a lot." }
+      {
+        "score": 10,
+        "date": "2026-03-02",
+        "text": "It has been extremely helpful for my wife as she navigated late onset type 1 diabetes. I don’t know what we would have done without it."
+      },
+      {
+        "score": 8,
+        "date": "2026-03-02",
+        "text": "No something I discuss"
+      },
+      {
+        "score": 5,
+        "date": "2026-03-02",
+        "text": "It's a good thing"
+      },
+      {
+        "score": 10,
+        "date": "2026-03-01",
+        "text": "They make it easier to track my diabetes and I’ve managed to become much healthier."
+      },
+      {
+        "score": 7,
+        "date": "2026-03-01",
+        "text": "It helps keep me on track with my diabetes and makes it easier to manage."
+      },
+      {
+        "score": 10,
+        "date": "2026-03-01",
+        "text": "It has changed my life. I have lost weight and feel better."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "It is great. The people are very helpful."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "It’s very helpful and makes diabetes management less stressful."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "It gives me tools to manage my diabetes and the support is great."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "I like having a coach and the reminders. It keeps me motivated."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "It helps me keep track of everything and makes it easier to stay consistent."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-28",
+        "text": "It’s a good program with helpful people."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-27",
+        "text": "It helps me stay accountable and I’ve learned a lot."
+      },
+      {
+        "score": 9,
+        "date": "2026-02-27",
+        "text": "It’s a great resource for managing diabetes."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-27",
+        "text": "Support is excellent and makes management easy."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-26",
+        "text": "Helps me understand my numbers and make better decisions."
+      },
+      {
+        "score": 9,
+        "date": "2026-02-26",
+        "text": "Great service and easy to use."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-26",
+        "text": "It’s been very helpful to stay on track."
+      },
+      {
+        "score": 9,
+        "date": "2026-02-25",
+        "text": "Good program and good support."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-25",
+        "text": "Very helpful and convenient."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-24",
+        "text": "Great coaching and tools."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-24",
+        "text": "It helps me manage my diabetes better."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-23",
+        "text": "It’s helpful and keeps me accountable."
+      },
+      {
+        "score": 9,
+        "date": "2026-02-23",
+        "text": "Helpful program and supportive team."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-22",
+        "text": "It has helped me stay consistent."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-21",
+        "text": "Easy to use and very supportive."
+      },
+      {
+        "score": 10,
+        "date": "2026-02-20",
+        "text": "It’s been extremely beneficial."
+      }
     ];
 
-    const PAGE_SIZE = 9;
+    // Show ALL by default so you never think it's “missing” data
+    const PAGE_SIZE = 9999;
     const CLAMP_CHARS = 220;
+    const PREF_KEY = "review_prefs_v1";
 
     const els = {
       grid: document.getElementById("grid"),
       empty: document.getElementById("empty"),
       status: document.getElementById("status"),
-      moreBtn: document.getElementById("moreBtn"),
       q: document.getElementById("q"),
       minScore: document.getElementById("minScore"),
       sort: document.getElementById("sort"),
       resetBtn: document.getElementById("resetBtn"),
+      clearPrefsBtn: document.getElementById("clearPrefsBtn"),
       statTotal: document.getElementById("statTotal"),
       statAvg: document.getElementById("statAvg"),
       statNps: document.getElementById("statNps"),
@@ -486,18 +595,87 @@
 
     function savePrefs(){
       const prefs = { q: els.q.value, minScore: els.minScore.value, sort: els.sort.value };
-      localStorage.setItem("review_prefs_v1", JSON.stringify(prefs));
+      localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
     }
 
     function loadPrefs(){
       try{
-        const raw = localStorage.getItem("review_prefs_v1");
+        const raw = localStorage.getItem(PREF_KEY);
         if(!raw) return;
         const prefs = JSON.parse(raw);
         if (typeof prefs.q === "string") els.q.value = prefs.q;
         if (typeof prefs.minScore === "string") els.minScore.value = prefs.minScore;
         if (typeof prefs.sort === "string") els.sort.value = prefs.sort;
       }catch(e){}
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function renderCard(r){
+      const cat = category(r.score);
+      const c = document.createElement("article");
+      c.className = "card";
+      c.setAttribute("tabindex","0");
+
+      const { short, clamped } = clampText(r.text, CLAMP_CHARS);
+      const dateStr = r.date
+        ? r.date.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" })
+        : "";
+
+      c.innerHTML = `
+        <div class="row">
+          <div class="badge" aria-label="Score and category">
+            <span class="score ${cat.key}">${r.score ?? "—"}</span>
+            <span style="color: var(--faint)">/ 10</span>
+            <span style="width:1px;height:14px;background:rgba(255,255,255,.14);display:inline-block;margin:0 4px;"></span>
+            <span style="color:${cat.color}; font-weight:800">${cat.label}</span>
+          </div>
+          <div class="badge" aria-label="Star rating">
+            <span class="stars" title="Star rating">${stars10(r.score)}</span>
+          </div>
+        </div>
+
+        <p class="quote ${clamped ? "quoteClamp" : ""}">“${escapeHtml(short)}”</p>
+
+        <div class="meta">
+          <span>${dateStr ? `Submitted ${escapeHtml(dateStr)}` : " "}</span>
+          ${clamped ? `<button class="link" type="button">Read more</button>` : `<span></span>`}
+        </div>
+      `;
+
+      const btn = c.querySelector(".link");
+      if (btn){
+        btn.addEventListener("click", (e) => { e.stopPropagation(); openModal(r); });
+      }
+      c.addEventListener("click", () => openModal(r));
+      c.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openModal(r); }
+      });
+
+      return c;
+    }
+
+    function updateStatus(){
+      const total = filtered.length;
+      const shown = Math.min(shownCount, total);
+      els.status.textContent = total
+        ? `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} reviews`
+        : `No matching reviews`;
+      els.empty.style.display = total ? "none" : "block";
+    }
+
+    function renderNextPage(){
+      const next = filtered.slice(shownCount, shownCount + PAGE_SIZE);
+      shownCount += next.length;
+      for(const r of next) els.grid.appendChild(renderCard(r));
+      updateStatus();
     }
 
     function applyFilters(){
@@ -528,89 +706,7 @@
       els.grid.innerHTML = "";
       renderNextPage();
       setStats(filtered);
-      updateStatus();
       savePrefs();
-    }
-
-    function updateStatus(){
-      const total = filtered.length;
-      const shown = Math.min(shownCount, total);
-      els.status.textContent = total
-        ? `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} reviews`
-        : `No matching reviews`;
-      els.empty.style.display = total ? "none" : "block";
-      els.moreBtn.style.display = shown < total ? "inline-flex" : "none";
-    }
-
-    function renderNextPage(){
-      const total = filtered.length;
-      const next = filtered.slice(shownCount, shownCount + PAGE_SIZE);
-      shownCount += next.length;
-
-      for(const r of next){
-        els.grid.appendChild(renderCard(r));
-      }
-      updateStatus();
-    }
-
-    function renderCard(r){
-      const cat = category(r.score);
-      const c = document.createElement("article");
-      c.className = "card";
-      c.setAttribute("tabindex","0");
-
-      const { short, clamped } = clampText(r.text, CLAMP_CHARS);
-
-      const dateStr = r.date
-        ? r.date.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" })
-        : "";
-
-      c.innerHTML = `
-        <div class="row">
-          <div class="badge" aria-label="Score and category">
-            <span class="score ${cat.key}">${r.score ?? "—"}</span>
-            <span style="color: var(--faint)">/ 10</span>
-            <span style="width:1px;height:14px;background:rgba(255,255,255,.14);display:inline-block;margin:0 4px;"></span>
-            <span style="color:${cat.color}; font-weight:800">${cat.label}</span>
-          </div>
-          <div class="badge" aria-label="Star rating">
-            <span class="stars" title="Star rating">${stars10(r.score)}</span>
-          </div>
-        </div>
-
-        <p class="quote ${clamped ? "quoteClamp" : ""}">“${escapeHtml(short)}”</p>
-
-        <div class="meta">
-          <span>${dateStr ? `Submitted ${escapeHtml(dateStr)}` : " "}</span>
-          ${clamped ? `<button class="link" type="button">Read more</button>` : `<span></span>`}
-        </div>
-      `;
-
-      const btn = c.querySelector(".link");
-      if (btn){
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          openModal(r);
-        });
-      }
-      c.addEventListener("click", () => openModal(r));
-      c.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          openModal(r);
-        }
-      });
-
-      return c;
-    }
-
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
     }
 
     function openModal(r){
@@ -650,11 +746,19 @@
       if (e.key === "Escape" && els.modalBackdrop.classList.contains("open")) closeModal();
     });
 
-    els.moreBtn.addEventListener("click", renderNextPage);
     ["input","change"].forEach(evt => els.q.addEventListener(evt, applyFilters));
     els.minScore.addEventListener("change", applyFilters);
     els.sort.addEventListener("change", applyFilters);
+
     els.resetBtn.addEventListener("click", () => {
+      els.q.value = "";
+      els.minScore.value = "0";
+      els.sort.value = "best";
+      applyFilters();
+    });
+
+    els.clearPrefsBtn.addEventListener("click", () => {
+      localStorage.removeItem(PREF_KEY);
       els.q.value = "";
       els.minScore.value = "0";
       els.sort.value = "best";
@@ -663,7 +767,6 @@
 
     function init(){
       loadPrefs();
-      // Normalize hardcoded data into internal shape
       all = REVIEWS.map(r => ({
         score: parseScore(r.score),
         text: String(r.text ?? ""),
