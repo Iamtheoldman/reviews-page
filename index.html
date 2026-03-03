@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reviews</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.08);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --faint:rgba(255,255,255,.45);
+      --border:rgba(255,255,255,.14);
+      --shadow:0 18px 50px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:24px;
+      --ring:0 0 0 4px rgba(255,255,255,.14);
+      --good:#34d399;
+      --mid:#fbbf24;
+      --bad:#fb7185;
+      --accent:#60a5fa;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96,165,250,.25), transparent 60%),
+        radial-gradient(900px 600px at 110% 10%, rgba(52,211,153,.18), transparent 60%),
+        radial-gradient(900px 700px at 40% 120%, rgba(251,113,133,.14), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 64px}
+
+    /* Top */
+    .top{
+      display:grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap:16px;
+      align-items:stretch;
+      margin-bottom:16px;
+    }
+    @media (max-width: 900px){ .top{grid-template-columns:1fr} }
+
+    .hero{
+      padding:22px;
+      border:1px solid var(--border);
+      border-radius:var(--radius2);
+      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:radial-gradient(700px 240px at 20% 0%, rgba(96,165,250,.18), transparent 60%);
+      pointer-events:none;
+    }
+    .hero h1{
+      margin:0 0 6px;
+      font-size:clamp(20px, 2.4vw, 30px);
+      letter-spacing:.2px;
+      position:relative;
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:70ch;
+      position:relative;
+    }
+
+    .stats{
+      border:1px solid var(--border);
+      border-radius:var(--radius2);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);
+      padding:18px;
+      display:grid;
+      gap:10px;
+      align-content:start;
+    }
+    .statRow{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:baseline;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .statLabel{color:var(--muted);font-size:13px}
+    .statValue{font-weight:800;font-size:18px;letter-spacing:.2px}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:var(--muted);
+      user-select:none;
+    }
+    .dot{width:9px;height:9px;border-radius:99px;background:var(--accent)}
+
+    /* Controls */
+    .controls{
+      display:grid;
+      grid-template-columns: 1.4fr .6fr .6fr auto;
+      gap:10px;
+      margin:14px 0 16px;
+      padding:12px;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      backdrop-filter: blur(8px);
+    }
+    @media (max-width: 900px){
+      .controls{grid-template-columns:1fr 1fr}
+      .controls .btn{grid-column:1/-1}
+    }
+
+    .field{display:grid;gap:6px}
+    .label{font-size:12px;color:var(--muted)}
+    input,select{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.25);
+      color:var(--text);
+      outline:none;
+    }
+    input::placeholder{color:rgba(255,255,255,.35)}
+    input:focus,select:focus{box-shadow:var(--ring);border-color:rgba(255,255,255,.22)}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      color:var(--text);
+      cursor:pointer;
+      transition:transform .08s ease, border-color .2s ease;
+      user-select:none;
+      font-weight:650;
+      letter-spacing:.2px;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.24)}
+    .btn:active{transform:translateY(0)}
+    .btn:focus{outline:none;box-shadow:var(--ring)}
+    .btn.secondary{
+      background:rgba(255,255,255,.05);
+      font-weight:600;
+      color:var(--muted);
+    }
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
+
+    .card{
+      border-radius:var(--radius2);
+      border:1px solid rgba(255,255,255,.13);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow:0 14px 36px rgba(0,0,0,.35);
+      padding:16px;
+      min-height:170px;
+      display:grid;
+      gap:10px;
+      transition:transform .12s ease, border-color .2s ease;
+    }
+    .card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.22)}
+    .card:focus{outline:none;box-shadow:var(--ring)}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.22);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .score{font-weight:900;letter-spacing:.3px}
+    .score.good{color:var(--good)}
+    .score.mid{color:var(--mid)}
+    .score.bad{color:var(--bad)}
+    .stars{display:flex;gap:2px;align-items:center;color:rgba(255,255,255,.75);font-size:13px;letter-spacing:1px}
+
+    .quote{margin:0;color:rgba(255,255,255,.88);font-size:14px}
+    .quoteClamp{
+      display:-webkit-box;
+      -webkit-line-clamp:4;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-top:4px;
+      color:var(--faint);
+      font-size:12px;
+    }
+    .link{
+      border:0;background:transparent;
+      color:rgba(96,165,250,.95);
+      cursor:pointer;padding:0;
+      font-weight:700;
+    }
+    .link:focus{outline:none;box-shadow:var(--ring);border-radius:8px}
+    .empty{
+      border:1px dashed rgba(255,255,255,.22);
+      border-radius:var(--radius2);
+      padding:22px;
+      color:var(--muted);
+      background:rgba(255,255,255,.03);
+      text-align:center;
+      display:none;
+    }
+    .footerActions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+
+    /* Modal */
+    .modalBackdrop{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.6);
+      display:none;
+      place-items:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modalBackdrop.open{display:grid}
+    .modal{
+      width:min(780px,100%);
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.18);
+      background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(2,6,23,.92));
+      box-shadow:0 30px 90px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .modalHeader{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      gap:12px;
+    }
+    .modalTitle{margin:0;font-size:14px;font-weight:850;letter-spacing:.2px}
+    .iconBtn{
+      width:38px;height:38px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      color:rgba(255,255,255,.9);
+      cursor:pointer;
+    }
+    .iconBtn:hover{border-color:rgba(255,255,255,.24)}
+    .iconBtn:focus{outline:none;box-shadow:var(--ring)}
+    .modalBody{padding:16px;display:grid;gap:12px}
+    .modalQuote{margin:0;font-size:15px;color:rgba(255,255,255,.9);line-height:1.6;white-space:pre-wrap}
+
+    /* Print-friendly (optional) */
+    @media print{
+      body{background:#fff;color:#000}
+      .controls,.footerActions,.pill,.modalBackdrop{display:none!important}
+      .card{box-shadow:none;border:1px solid #ccc}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <section class="hero">
+        <h1>What members are saying</h1>
+        <p>
+          Curated testimonials with fast search, smart filters, and a “read more” experience that keeps the page scannable.
+        </p>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+          <span class="pill"><span class="dot"></span>Hardcoded data</span>
+          <span class="pill"><span class="dot" style="background:var(--good)"></span>Promoters</span>
+          <span class="pill"><span class="dot" style="background:var(--mid)"></span>Passives</span>
+          <span class="pill"><span class="dot" style="background:var(--bad)"></span>Detractors</span>
+        </div>
+      </section>
+
+      <aside class="stats" aria-label="Summary stats">
+        <div class="statRow">
+          <div class="statLabel">Total reviews</div>
+          <div class="statValue" id="statTotal">—</div>
+        </div>
+        <div class="statRow">
+          <div class="statLabel">Average score</div>
+          <div class="statValue" id="statAvg">—</div>
+        </div>
+        <div class="statRow">
+          <div class="statLabel">NPS (promoters − detractors)</div>
+          <div class="statValue" id="statNps">—</div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="controls" aria-label="Review controls">
+      <div class="field">
+        <div class="label">Search</div>
+        <input id="q" type="search" placeholder="Search testimonials…" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <div class="label">Minimum score</div>
+        <select id="minScore">
+          <option value="0">All</option>
+          <option value="10">10</option>
+          <option value="9">9+</option>
+          <option value="8">8+</option>
+          <option value="7">7+</option>
+          <option value="6">6+</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">Sort</div>
+        <select id="sort">
+          <option value="best">Best first</option>
+          <option value="newest">Newest first</option>
+          <option value="worst">Worst first</option>
+          <option value="random">Shuffle</option>
+        </select>
+      </div>
+
+      <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+    </section>
+
+    <div id="status" class="label" style="margin: 0 0 10px 2px; color: var(--muted);"></div>
+
+    <section id="grid" class="grid" aria-label="Reviews list"></section>
+
+    <div id="empty" class="empty">
+      No reviews match your filters. Try clearing search or lowering the minimum score.
+    </div>
+
+    <div class="footerActions">
+      <button class="btn" id="moreBtn" type="button" style="display:none;">Load more</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalBackdrop" class="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" role="document">
+      <div class="modalHeader">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="badge" id="modalBadge">Score: —</div>
+          <h2 class="modalTitle" id="modalTitle">Full testimonial</h2>
+        </div>
+        <button class="iconBtn" id="closeModal" type="button" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modalBody">
+        <p class="modalQuote" id="modalText"></p>
+        <div class="meta" id="modalMeta"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ✅ HARD-CODED DATA
+     * Replace/extend this array with your real reviews.
+     * Tip: keep text plain (no HTML) and we will safely render it.
+     */
+    const REVIEWS = [
+      { score: 10, date: "2026-02-18", text: "Incredibly easy to use and the support team actually follows through. It’s made a noticeable difference for me." },
+      { score: 9,  date: "2026-02-03", text: "Simple, clean experience. I like how quickly I can get what I need without jumping through hoops." },
+      { score: 10, date: "2026-01-22", text: "My favorite part is how clear everything is. It feels designed for real people, not just checkboxes." },
+      { score: 8,  date: "2026-01-11", text: "Overall great. A couple steps could be a bit clearer, but the results have been worth it." },
+      { score: 9,  date: "2025-12-27", text: "Fast, friendly, and consistent. The experience has been smooth from day one." },
+      { score: 7,  date: "2025-12-12", text: "Good experience. I’d love to see more tips or a quick-start guide for new users." },
+      { score: 10, date: "2025-11-28", text: "Honestly, this is the first time I’ve felt truly supported. Everything is straightforward and helpful." },
+      { score: 6,  date: "2025-11-02", text: "Helpful, but I had some confusion at the start. Once I got it set up, it was fine." },
+      { score: 9,  date: "2025-10-19", text: "Great experience. It saves time and removes a lot of stress." },
+      { score: 10, date: "2025-10-01", text: "Super easy, and I feel like I’m finally on track. Wish I had started sooner." },
+      { score: 8,  date: "2025-09-15", text: "Solid. Would recommend. The UI is clean and I like the reminders." },
+      { score: 9,  date: "2025-09-03", text: "The process is smooth and the communication is clear. That matters a lot." }
+    ];
+
+    const PAGE_SIZE = 9;
+    const CLAMP_CHARS = 220;
+
+    const els = {
+      grid: document.getElementById("grid"),
+      empty: document.getElementById("empty"),
+      status: document.getElementById("status"),
+      moreBtn: document.getElementById("moreBtn"),
+      q: document.getElementById("q"),
+      minScore: document.getElementById("minScore"),
+      sort: document.getElementById("sort"),
+      resetBtn: document.getElementById("resetBtn"),
+      statTotal: document.getElementById("statTotal"),
+      statAvg: document.getElementById("statAvg"),
+      statNps: document.getElementById("statNps"),
+      modalBackdrop: document.getElementById("modalBackdrop"),
+      closeModal: document.getElementById("closeModal"),
+      modalText: document.getElementById("modalText"),
+      modalBadge: document.getElementById("modalBadge"),
+      modalMeta: document.getElementById("modalMeta"),
+    };
+
+    let all = [];
+    let filtered = [];
+    let shownCount = 0;
+    let lastFocusEl = null;
+
+    function clampText(s, n){
+      const t = (s || "").trim().replace(/\s+/g, " ");
+      if (t.length <= n) return { short: t, clamped: false };
+      return { short: t.slice(0, n - 1) + "…", clamped: true };
+    }
+
+    function parseScore(v){
+      const n = Number(String(v).trim());
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function parseDateISO(v){
+      const s = String(v || "").trim();
+      if (!s) return null;
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function category(score){
+      if (score == null) return { label: "Unknown", key:"mid", color: "var(--mid)" };
+      if (score >= 9) return { label: "Promoter", key:"good", color: "var(--good)" };
+      if (score >= 7) return { label: "Passive", key:"mid", color: "var(--mid)" };
+      return { label: "Detractor", key:"bad", color: "var(--bad)" };
+    }
+
+    function stars10(score){
+      const s = Math.max(0, Math.min(10, score ?? 0));
+      const outOf5 = s / 2;
+      const half = Math.round(outOf5 * 2) / 2;
+      const fullStars = Math.floor(half);
+      const hasHalf = half - fullStars === 0.5;
+      let str = "★".repeat(fullStars);
+      if (hasHalf) str += "⯪";
+      str += "☆".repeat(Math.max(0, 5 - fullStars - (hasHalf ? 1 : 0)));
+      return str;
+    }
+
+    function computeStats(rows){
+      const scores = rows.map(r => r.score).filter(s => typeof s === "number");
+      const total = rows.length;
+      const avg = scores.length ? (scores.reduce((a,b)=>a+b,0) / scores.length) : null;
+
+      const promoters = scores.filter(s => s >= 9).length;
+      const detractors = scores.filter(s => s <= 6).length;
+      const nps = scores.length ? Math.round(((promoters - detractors) / scores.length) * 100) : null;
+
+      return { total, avg, nps };
+    }
+
+    function setStats(rows){
+      const st = computeStats(rows);
+      els.statTotal.textContent = st.total.toLocaleString();
+      els.statAvg.textContent = st.avg == null ? "—" : st.avg.toFixed(1) + " / 10";
+      els.statNps.textContent = st.nps == null ? "—" : st.nps;
+    }
+
+    function savePrefs(){
+      const prefs = { q: els.q.value, minScore: els.minScore.value, sort: els.sort.value };
+      localStorage.setItem("review_prefs_v1", JSON.stringify(prefs));
+    }
+
+    function loadPrefs(){
+      try{
+        const raw = localStorage.getItem("review_prefs_v1");
+        if(!raw) return;
+        const prefs = JSON.parse(raw);
+        if (typeof prefs.q === "string") els.q.value = prefs.q;
+        if (typeof prefs.minScore === "string") els.minScore.value = prefs.minScore;
+        if (typeof prefs.sort === "string") els.sort.value = prefs.sort;
+      }catch(e){}
+    }
+
+    function applyFilters(){
+      const q = els.q.value.trim().toLowerCase();
+      const min = Number(els.minScore.value);
+      const sort = els.sort.value;
+
+      filtered = all.filter(r => {
+        const okScore = r.score == null ? true : r.score >= min;
+        const okQ = !q || (r.text || "").toLowerCase().includes(q);
+        return okScore && okQ;
+      });
+
+      if (sort === "best"){
+        filtered.sort((a,b) => (b.score ?? -1) - (a.score ?? -1));
+      } else if (sort === "worst"){
+        filtered.sort((a,b) => (a.score ?? 99) - (b.score ?? 99));
+      } else if (sort === "newest"){
+        filtered.sort((a,b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0));
+      } else if (sort === "random"){
+        for (let i = filtered.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+      }
+
+      shownCount = 0;
+      els.grid.innerHTML = "";
+      renderNextPage();
+      setStats(filtered);
+      updateStatus();
+      savePrefs();
+    }
+
+    function updateStatus(){
+      const total = filtered.length;
+      const shown = Math.min(shownCount, total);
+      els.status.textContent = total
+        ? `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} reviews`
+        : `No matching reviews`;
+      els.empty.style.display = total ? "none" : "block";
+      els.moreBtn.style.display = shown < total ? "inline-flex" : "none";
+    }
+
+    function renderNextPage(){
+      const total = filtered.length;
+      const next = filtered.slice(shownCount, shownCount + PAGE_SIZE);
+      shownCount += next.length;
+
+      for(const r of next){
+        els.grid.appendChild(renderCard(r));
+      }
+      updateStatus();
+    }
+
+    function renderCard(r){
+      const cat = category(r.score);
+      const c = document.createElement("article");
+      c.className = "card";
+      c.setAttribute("tabindex","0");
+
+      const { short, clamped } = clampText(r.text, CLAMP_CHARS);
+
+      const dateStr = r.date
+        ? r.date.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" })
+        : "";
+
+      c.innerHTML = `
+        <div class="row">
+          <div class="badge" aria-label="Score and category">
+            <span class="score ${cat.key}">${r.score ?? "—"}</span>
+            <span style="color: var(--faint)">/ 10</span>
+            <span style="width:1px;height:14px;background:rgba(255,255,255,.14);display:inline-block;margin:0 4px;"></span>
+            <span style="color:${cat.color}; font-weight:800">${cat.label}</span>
+          </div>
+          <div class="badge" aria-label="Star rating">
+            <span class="stars" title="Star rating">${stars10(r.score)}</span>
+          </div>
+        </div>
+
+        <p class="quote ${clamped ? "quoteClamp" : ""}">“${escapeHtml(short)}”</p>
+
+        <div class="meta">
+          <span>${dateStr ? `Submitted ${escapeHtml(dateStr)}` : " "}</span>
+          ${clamped ? `<button class="link" type="button">Read more</button>` : `<span></span>`}
+        </div>
+      `;
+
+      const btn = c.querySelector(".link");
+      if (btn){
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openModal(r);
+        });
+      }
+      c.addEventListener("click", () => openModal(r));
+      c.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          openModal(r);
+        }
+      });
+
+      return c;
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function openModal(r){
+      lastFocusEl = document.activeElement;
+      const cat = category(r.score);
+
+      els.modalBadge.innerHTML = `
+        <span class="score ${cat.key}">${r.score ?? "—"}</span>
+        <span style="color: var(--faint)">/ 10</span>
+        <span style="margin-left:8px; color:${cat.color}; font-weight:900">${cat.label}</span>
+      `;
+
+      els.modalText.textContent = (r.text || "").trim() || "No testimonial text provided.";
+      const dateStr = r.date
+        ? r.date.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric" })
+        : "Unknown date";
+
+      els.modalMeta.innerHTML = `
+        <span>Submitted: ${escapeHtml(dateStr)}</span>
+        <span class="stars" aria-label="Star rating">${stars10(r.score)}</span>
+      `;
+
+      els.modalBackdrop.classList.add("open");
+      els.closeModal.focus();
+    }
+
+    function closeModal(){
+      els.modalBackdrop.classList.remove("open");
+      if (lastFocusEl && typeof lastFocusEl.focus === "function") lastFocusEl.focus();
+    }
+
+    els.modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === els.modalBackdrop) closeModal();
+    });
+    els.closeModal.addEventListener("click", closeModal);
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && els.modalBackdrop.classList.contains("open")) closeModal();
+    });
+
+    els.moreBtn.addEventListener("click", renderNextPage);
+    ["input","change"].forEach(evt => els.q.addEventListener(evt, applyFilters));
+    els.minScore.addEventListener("change", applyFilters);
+    els.sort.addEventListener("change", applyFilters);
+    els.resetBtn.addEventListener("click", () => {
+      els.q.value = "";
+      els.minScore.value = "0";
+      els.sort.value = "best";
+      applyFilters();
+    });
+
+    function init(){
+      loadPrefs();
+      // Normalize hardcoded data into internal shape
+      all = REVIEWS.map(r => ({
+        score: parseScore(r.score),
+        text: String(r.text ?? ""),
+        date: parseDateISO(r.date)
+      })).filter(r => r.text.trim() || r.score != null);
+
+      applyFilters();
+    }
+
+    init();
+  </script>
+</body>
+</html>
